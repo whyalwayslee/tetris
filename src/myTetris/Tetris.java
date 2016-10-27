@@ -26,12 +26,8 @@ public class Tetris extends JFrame {
         }catch(Exception ex){
 
         }
-
         add(statusBar, BorderLayout.NORTH);
         add(highScore, BorderLayout.AFTER_LAST_LINE);
-        Font bigFont = statusBar.getFont().deriveFont(Font.PLAIN, 35f);
-        statusBar.setFont(bigFont);
-        highScore.setFont(bigFont);
         Board board = new Board(this);
         add(board);
         //start lines down
@@ -40,10 +36,37 @@ public class Tetris extends JFrame {
         //add one piece
         board.newPiece();
         board.repaint();
+        //createView();
+        Font bigFont = statusBar.getFont().deriveFont(Font.PLAIN, 20f);
+        statusBar.setFont(bigFont);
+        highScore.setFont(bigFont);
 
         setSize(300,600);
         setTitle("My Tetris");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+    }
+
+    public void createView(){
+        JPanel panelMain = new JPanel();
+        getContentPane().add(panelMain);
+
+        JPanel panelTetris = new JPanel(new GridBagLayout());
+        JPanel panelRight = new JPanel(new GridBagLayout());
+        panelMain.add(panelTetris);
+        panelMain.add(panelRight);
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+
+
+
+        panelMain.add(statusBar, constraints);
+        //add(highScore, BorderLayout.AFTER_LAST_LINE);
+
+        panelRight.add(new JLabel("Next: "), constraints);
+
 
     }
 

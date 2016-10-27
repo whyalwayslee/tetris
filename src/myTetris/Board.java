@@ -87,7 +87,6 @@ public class Board extends JPanel implements ActionListener {
         curY = BOARD_HEIGHT + curPiece.minY();
 
         if (!tryMove(curPiece, curX, curY - 1)) {
-//            curPiece.setShape(Tetrominos.NoShape);
             timer.stop();
             isStarted = false;
             statusBar.setText("Game Over");
@@ -253,7 +252,6 @@ public class Board extends JPanel implements ActionListener {
 
 
     private void removeFullRow(int rowIndex) {
-        System.out.println("Removing row: " + rowIndex);
         for(int secondaryRowIndex = rowIndex; secondaryRowIndex < BOARD_HEIGHT - 1; ++secondaryRowIndex){
             for(int columnIndex = 0; columnIndex < BOARD_WIDTH; ++columnIndex){
                 Tetrominos blockAbove = shapeAt(columnIndex, secondaryRowIndex + 1);
