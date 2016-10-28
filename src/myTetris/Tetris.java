@@ -10,6 +10,7 @@ public class Tetris extends JFrame {
     private JLabel statusBar;
     private JLabel highScoreDisplay;
     private int highScoreNumber = 0;
+    private Board board;
 
     public Tetris() {
         statusBar = new JLabel("0"); //to display lines number
@@ -27,10 +28,14 @@ public class Tetris extends JFrame {
             highScoreNumber = 0;
             highScoreDisplay = new JLabel("Highscore: " + highScoreNumber); //to display high score
         }
-        add(statusBar, BorderLayout.NORTH);
-        add(highScoreDisplay, BorderLayout.AFTER_LAST_LINE);
-        Board board = new Board(this);
-        add(board);
+        //add(statusBar, BorderLayout.NORTH);
+        //add(highScoreDisplay, BorderLayout.AFTER_LAST_LINE);
+
+        board = new Board(this);
+
+        createView();
+
+        //add(board);
         //start lines down
         board.start();
 
@@ -42,32 +47,53 @@ public class Tetris extends JFrame {
         statusBar.setFont(bigFont);
         highScoreDisplay.setFont(bigFont);
 
-        setSize(300,600);
+        setSize(500,800);
         setTitle("My Tetris");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
     }
 
-    public void createView(){
-        JPanel panelMain = new JPanel();
-        getContentPane().add(panelMain);
-
-        JPanel panelTetris = new JPanel(new GridBagLayout());
-        JPanel panelRight = new JPanel(new GridBagLayout());
-        panelMain.add(panelTetris);
-        panelMain.add(panelRight);
-
+    public void createView() {
+        JPanel panelMain = new JPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 0;
-
-
+        constraints.ipady = 20;
 
         panelMain.add(statusBar, constraints);
-        //add(highScoreDisplay, BorderLayout.AFTER_LAST_LINE);
 
-        panelRight.add(new JLabel("Next: "), constraints);
+        constraints.gridx = 1;
+        panelMain.add(highScoreDisplay, constraints);
 
+        //Main Tetris board settings start
+
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.gridheight = 2;
+        constraints.gridwidth = 1;
+        constraints.fill=GridBagConstraints.BOTH;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+
+        //Main Tetris board settings end
+
+        panelMain.add(board, constraints);
+
+        constraints.gridheight = 1;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.weightx = 0;
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+
+        panelMain.add(new JLabel("Next item to go here"), constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 2;
+        constraints.ipady = 300;
+
+        panelMain.add(new JLabel("Hold item to go here"), constraints);
+
+        getContentPane().add(panelMain);
 
     }
 
