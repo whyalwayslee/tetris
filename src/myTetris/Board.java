@@ -28,16 +28,18 @@ public class Board extends JPanel implements ActionListener {
     private int curX = 0;
     private int curY = 0;
     private JLabel statusBar;
+    private JLabel highScoreDisplay;
     private int currentRecord;
     private Shape curPiece;
     private Tetrominos[] board;
 
-    public Board(Tetris parent){
+    public Board(Tetris tetris){
         setFocusable(true);
         curPiece = new Shape();
         timer = new Timer(450,this); //timer for lines down
-        statusBar = parent.getStatusBar();
-        currentRecord = parent.getHighScoreNumber();
+        statusBar = tetris.getStatusBar();
+        currentRecord = tetris.getHighScoreNumber();
+        highScoreDisplay = tetris.getHighScoreLabel();
         board = new Tetrominos[BOARD_WIDTH * BOARD_HEIGHT];
         this.setBorder(new BevelBorder(BevelBorder.RAISED,Color.BLACK,Color.BLACK));
         clearBoard();
@@ -105,11 +107,13 @@ public class Board extends JPanel implements ActionListener {
             }
             Properties properties = new Properties();
             properties.setProperty("score", String.valueOf(numLinesRemoved));
+            highScoreDisplay.setText("New Highscore!");
             try {
                 properties.store(output, "");
                 output.close();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.err.println("Error reading properties file");
             }
         }
     }

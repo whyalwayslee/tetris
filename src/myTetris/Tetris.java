@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Tetris extends JFrame {
     private JLabel statusBar;
-    private JLabel highScore;
+    private JLabel highScoreDisplay;
     private int highScoreNumber = 0;
 
     public Tetris() {
@@ -21,13 +21,14 @@ public class Tetris extends JFrame {
             if(properties.containsKey("score")){
                 highScoreNumber = Integer.parseInt(properties.getProperty("score"));
             }
-            highScore = new JLabel("Highscore: " + highScoreNumber); //to display high score
+            highScoreDisplay = new JLabel("Highscore: " + highScoreNumber); //to display high score
 
         }catch(Exception ex){
-
+            highScoreNumber = 0;
+            highScoreDisplay = new JLabel("Highscore: " + highScoreNumber); //to display high score
         }
         add(statusBar, BorderLayout.NORTH);
-        add(highScore, BorderLayout.AFTER_LAST_LINE);
+        add(highScoreDisplay, BorderLayout.AFTER_LAST_LINE);
         Board board = new Board(this);
         add(board);
         //start lines down
@@ -39,7 +40,7 @@ public class Tetris extends JFrame {
         //createView();
         Font bigFont = statusBar.getFont().deriveFont(Font.PLAIN, 20f);
         statusBar.setFont(bigFont);
-        highScore.setFont(bigFont);
+        highScoreDisplay.setFont(bigFont);
 
         setSize(300,600);
         setTitle("My Tetris");
@@ -63,7 +64,7 @@ public class Tetris extends JFrame {
 
 
         panelMain.add(statusBar, constraints);
-        //add(highScore, BorderLayout.AFTER_LAST_LINE);
+        //add(highScoreDisplay, BorderLayout.AFTER_LAST_LINE);
 
         panelRight.add(new JLabel("Next: "), constraints);
 
@@ -75,6 +76,8 @@ public class Tetris extends JFrame {
     }
 
     public int getHighScoreNumber() {return highScoreNumber; }
+
+    public JLabel getHighScoreLabel() {return highScoreDisplay; }
 
     public static void main(String[] args) {
         Tetris myTetris = new Tetris();
