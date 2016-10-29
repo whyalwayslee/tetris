@@ -5,7 +5,7 @@ import java.util.Random;
 public class Shape {
 
 
-    private Tetrominos pieceShape;
+    public Tetrominos pieceShape;
     private int[][] coords;
 
     public Shape() {

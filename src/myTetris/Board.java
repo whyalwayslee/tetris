@@ -28,16 +28,19 @@ public class Board extends JPanel implements ActionListener {
     private int curX = 0;
     private int curY = 0;
     private JLabel statusBar;
+    private JLabel levelBar;
     private JLabel highScoreDisplay;
     private int currentRecord;
-    private Shape curPiece;
+    private int level;
+    private Shape currentPiece;
     private Tetrominos[] board;
 
     public Board(Tetris tetris){
         setFocusable(true);
-        curPiece = new Shape();
-        timer = new Timer(450,this); //timer for lines down
-        statusBar = tetris.getStatusBar();
+        currentPiece = new Shape();
+        timer = new Timer(500,this); //timer for lines down
+        statusBar = tetris.getScoreBar();
+        levelBar = tetris.getLevelBar();
         currentRecord = tetris.getHighScoreNumber();
         highScoreDisplay = tetris.getHighScoreLabel();
         board = new Tetrominos[BOARD_WIDTH * BOARD_HEIGHT];
@@ -66,9 +69,9 @@ public class Board extends JPanel implements ActionListener {
 
     private void pieceDropped(){
         for(int i=0; i<4; i++){
-            int x = curX + curPiece.x(i);
-            int y = curY - curPiece.y(i);
-            setBoardPiece(curPiece.getShape(), x, y);
+            int x = curX + currentPiece.x(i);
+            int y = curY - currentPiece.y(i);
+            setBoardPiece(currentPiece.getShape(), x, y);
         }
 
         removeFullLines();
@@ -84,11 +87,11 @@ public class Board extends JPanel implements ActionListener {
     }
 
     public void newPiece() {
-        curPiece.setRandomShape();
-        curX = BOARD_WIDTH / 2 + 1;
-        curY = BOARD_HEIGHT + curPiece.minY();
+        currentPiece.setRandomShape();
+        curX = BOARD_WIDTH / 2 + currentPiece.minX();
+        curY = BOARD_HEIGHT + currentPiece.minY();
 
-        if (!tryMove(curPiece, curX, curY - 1)) {
+        if (!tryMove(currentPiece, curX + 2, curY - 1)) {
             timer.stop();
             isStarted = false;
             statusBar.setText("Game Over");
@@ -119,7 +122,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void oneLineDown(){
-            if(!tryMove(curPiece, curX, curY-1)){
+            if(!tryMove(currentPiece, curX, curY-1)){
                 pieceDropped();
             }
     }
@@ -137,7 +140,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     //Draw Tetrominos
-    private void drawSquare(Graphics2D g, int x, int y, Tetrominos shape){
+    public void drawSquare(Graphics2D g, int x, int y, Tetrominos shape){
         Color color = COLORS[shape.ordinal()];
         g.setColor(color);
         g.fillRect(x+1,y+1,squareWidth()-2, squareHeight()-2);
@@ -171,15 +174,19 @@ public class Board extends JPanel implements ActionListener {
             }
         }
 
-
-        if (curPiece.getShape() != Tetrominos.NoShape){
+        if (currentPiece.getShape() != Tetrominos.NoShape){
             for(int i =0; i<4; ++i){
-                int x = curX + curPiece.x(i);
-                int y = curY - curPiece.y(i);
-                drawSquare(g2d, x * squareWidth(), boardTop + (BOARD_HEIGHT - y - 1) * squareHeight(), curPiece.getShape());
+                int x = curX + currentPiece.x(i);
+                int y = curY - currentPiece.y(i);
+                drawSquare(g2d, x * squareWidth(), boardTop + (BOARD_HEIGHT - y - 1) * squareHeight(), currentPiece.getShape());
+                //System.out.println(currentPiece.getShape());
             }
         }
 
+    }
+
+    public String getCurrentPiece(){
+        return currentPiece.getShape().toString();
     }
 
     public void start(){
@@ -205,7 +212,7 @@ public class Board extends JPanel implements ActionListener {
             statusBar.setText("Paused");
         }else{
             timer.start();
-            statusBar.setText(String.valueOf(numLinesRemoved));
+            statusBar.setText(String.valueOf("Score: " + numLinesRemoved));
         }
         repaint();
     }
@@ -224,7 +231,7 @@ public class Board extends JPanel implements ActionListener {
             }
         }
 
-        curPiece = newPiece;
+        currentPiece = newPiece;
         curX = newX;
         curY = newY;
         repaint();
@@ -246,9 +253,58 @@ public class Board extends JPanel implements ActionListener {
 
             if (numFullLines > 0){
                 numLinesRemoved += numFullLines;
-                statusBar.setText(String.valueOf(numLinesRemoved));
+                statusBar.setText(String.valueOf("Score: " + numLinesRemoved));
+                level = numLinesRemoved / 10;
+                levelBar.setText(String.valueOf("Level: " + level));
+                switch(level){
+                    case 2 :
+                        timer.stop();
+                        timer = new Timer (450,this);
+                        timer.start();
+                        break;
+                    case 4 :
+                        timer.stop();
+                        timer = new Timer (400,this);
+                        timer.start();
+                        break;
+                    case 6 :
+                        timer.stop();
+                        timer = new Timer (350,this);
+                        timer.start();
+                        break;
+                    case 8 :
+                        timer.stop();
+                        timer = new Timer (300,this);
+                        timer.start();
+                        break;
+                    case 10 :
+                        timer.stop();
+                        timer = new Timer (250,this);
+                        timer.start();
+                        break;
+                    case 12 :
+                        timer.stop();
+                        timer = new Timer (200,this);
+                        timer.start();
+                        break;
+                    case 14 :
+                        timer.stop();
+                        timer = new Timer (150,this);
+                        timer.start();
+                        break;
+                    case 16 :
+                        timer.stop();
+                        timer = new Timer (100,this);
+                        timer.start();
+                        break;
+                    case 18 :
+                        timer.stop();
+                        timer = new Timer (50,this);
+                        timer.start();
+                        break;
+                }
                 isFallingFinished = true;
-                curPiece.setShape(Tetrominos.NoShape);
+                currentPiece.setShape(Tetrominos.NoShape);
                 repaint();
             }
         }
@@ -278,7 +334,7 @@ public class Board extends JPanel implements ActionListener {
         int newY = curY;
 
         while (newY > 0){
-            if (!tryMove(curPiece, curX, newY - 1)){
+            if (!tryMove(currentPiece, curX, newY - 1)){
                 break;
             }
             --newY;
@@ -286,11 +342,15 @@ public class Board extends JPanel implements ActionListener {
         pieceDropped();
     }
 
+    public void setLevel(int level) {
+        level = level;
+    }
+
 
     public class MyTetrisAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent ke){
-            if(!isStarted || curPiece.getShape() == Tetrominos.NoShape){
+            if(!isStarted || currentPiece.getShape() == Tetrominos.NoShape){
                 return;
             }
 
@@ -306,16 +366,16 @@ public class Board extends JPanel implements ActionListener {
 
             switch(keyCode){
                 case KeyEvent.VK_LEFT :
-                    tryMove(curPiece, curX -1, curY);
+                    tryMove(currentPiece, curX -1, curY);
                     break;
                 case KeyEvent.VK_RIGHT :
-                    tryMove(curPiece, curX + 1, curY);
+                    tryMove(currentPiece, curX + 1, curY);
                     break;
                 case KeyEvent.VK_DOWN :
-                    tryMove(curPiece, curX, curY-1);
+                    tryMove(currentPiece, curX, curY-1);
                     break;
                 case KeyEvent.VK_SPACE :
-                    tryMove(curPiece.rotateLeft(), curX, curY);
+                    tryMove(currentPiece.rotateLeft(), curX, curY);
                     break;
                 case KeyEvent.VK_UP :
                     dropDown();
