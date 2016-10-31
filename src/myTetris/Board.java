@@ -27,18 +27,21 @@ public class Board extends JPanel implements ActionListener {
     private int numLinesRemoved = 0;
     private int curX = 0;
     private int curY = 0;
+    private int nextLevelLines = 16;
+    private int timerNumber = 500;
     private JLabel statusBar;
     private JLabel levelBar;
     private JLabel highScoreDisplay;
     private int currentRecord;
-    private int level;
+    private int level = 1;
+
     private Shape currentPiece;
     private Tetrominos[] board;
 
     public Board(Tetris tetris){
         setFocusable(true);
         currentPiece = new Shape();
-        timer = new Timer(500,this); //timer for lines down
+        timer = new Timer(timerNumber,this); //timer for lines down
         statusBar = tetris.getScoreBar();
         levelBar = tetris.getLevelBar();
         currentRecord = tetris.getHighScoreNumber();
@@ -254,55 +257,18 @@ public class Board extends JPanel implements ActionListener {
             if (numFullLines > 0){
                 numLinesRemoved += numFullLines;
                 statusBar.setText(String.valueOf("Score: " + numLinesRemoved));
-                level = numLinesRemoved / 10;
-                levelBar.setText(String.valueOf("Level: " + level));
-                switch(level){
-                    case 2 :
-                        timer.stop();
-                        timer = new Timer (450,this);
-                        timer.start();
-                        break;
-                    case 4 :
-                        timer.stop();
-                        timer = new Timer (400,this);
-                        timer.start();
-                        break;
-                    case 6 :
-                        timer.stop();
-                        timer = new Timer (350,this);
-                        timer.start();
-                        break;
-                    case 8 :
-                        timer.stop();
-                        timer = new Timer (300,this);
-                        timer.start();
-                        break;
-                    case 10 :
-                        timer.stop();
-                        timer = new Timer (250,this);
-                        timer.start();
-                        break;
-                    case 12 :
-                        timer.stop();
-                        timer = new Timer (200,this);
-                        timer.start();
-                        break;
-                    case 14 :
-                        timer.stop();
-                        timer = new Timer (150,this);
-                        timer.start();
-                        break;
-                    case 16 :
-                        timer.stop();
-                        timer = new Timer (100,this);
-                        timer.start();
-                        break;
-                    case 18 :
-                        timer.stop();
-                        timer = new Timer (50,this);
-                        timer.start();
-                        break;
+
+                if(numLinesRemoved >= nextLevelLines){
+                    level = level + 1;
+                    nextLevelLines = (int)(nextLevelLines * 1.5);
+                    timer.stop();
+                    timerNumber = timerNumber - 40;
+                    timer = new Timer(timerNumber,this);
+                    timer.start();
+                    System.out.println(timerNumber);
                 }
+
+                levelBar.setText(String.valueOf("Level: " + level));
                 isFallingFinished = true;
                 currentPiece.setShape(Tetrominos.NoShape);
                 repaint();
@@ -340,10 +306,6 @@ public class Board extends JPanel implements ActionListener {
             --newY;
         }
         pieceDropped();
-    }
-
-    public void setLevel(int level) {
-        level = level;
     }
 
 
