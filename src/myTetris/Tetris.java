@@ -1,6 +1,7 @@
 package myTetris;
 
 import javax.swing.*;
+import java.applet.AudioClip;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -14,18 +15,32 @@ public class Tetris extends JFrame {
     private int currentScoreNumber = 0;
     public int level = 1;
     private Board board;
+    private MusicControl musicControl;
 
     public Tetris() {
-        scoreBar = new JLabel("Score: " + currentScoreNumber); //to display lines number
+        setUpScoreAndLevelDisplayBar();
+        startMusic();
+        loadInHighscoreOrSetNewOne();
 
-        if(currentScoreNumber > 10){
-            level = (currentScoreNumber/10);
-        }
+        board = new Board(this);
+        createView();
+        pack();
+        board.start();
+        board.setMinimumSize(new Dimension(300,600));
+        board.setPreferredSize(new Dimension(300, 600));
 
-        levelDisplay = new JLabel("Level: " + level); //to display level
 
+        //add one piece
+        board.newPiece();
+        board.repaint();
 
+        setSize(650,800);
+        setTitle("My Tetris");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+    }
+
+    private void loadInHighscoreOrSetNewOne() {
         InputStream inputStream = null;
         try{
             inputStream = new FileInputStream("Highscore.properties");
@@ -40,29 +55,25 @@ public class Tetris extends JFrame {
             highScoreNumber = 0;
             highScoreDisplay = new JLabel("Highscore: " + highScoreNumber); //to display high score
         }
+    }
 
-        board = new Board(this);
+    private void setUpScoreAndLevelDisplayBar() {
+        scoreBar = new JLabel("Score: " + currentScoreNumber); //to display lines number
+        levelDisplay = new JLabel("Level: " + level); //to display level
+    }
 
-        createView();
-        pack();
-        board.start();
-        board.setMinimumSize(new Dimension(300,600));
-        board.setPreferredSize(new Dimension(300, 600));
+    private void startMusic() {
+        try{
+            musicControl = new TetrisMusicControl();
+            musicControl.playBackgroundMusic();
+        }catch(Exception ex){
+            System.err.println("Error loading background music audio file");
+        }
+    }
 
-
-        //add one piece
-        board.newPiece();
-        board.repaint();
-
-        Font bigFont = scoreBar.getFont().deriveFont(Font.PLAIN, 20f);
-        scoreBar.setFont(bigFont);
-        levelDisplay.setFont(bigFont);
-        highScoreDisplay.setFont(bigFont);
-
-        setSize(650,800);
-        setTitle("My Tetris");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-
+    private AudioClip tetrisThemeMusic() {
+        ClassLoader ldr = this.getClass().getClassLoader();
+            return JApplet.newAudioClip(ldr.getResource("myTetris/ThemeA.mid"));
     }
 
     public void createView() {
@@ -116,6 +127,11 @@ public class Tetris extends JFrame {
 
         panelMain.add(new JLabel("Hold item to go here"), constraints);
 
+        Font bigFont = scoreBar.getFont().deriveFont(Font.PLAIN, 20f);
+        scoreBar.setFont(bigFont);
+        levelDisplay.setFont(bigFont);
+        highScoreDisplay.setFont(bigFont);
+
         getContentPane().add(panelMain);
 
     }
@@ -137,7 +153,5 @@ public class Tetris extends JFrame {
         myTetris.setLocationRelativeTo(null); //center
         myTetris.setVisible(true);
     }
-
-
 
 }

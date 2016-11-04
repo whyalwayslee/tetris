@@ -34,19 +34,21 @@ public class Board extends JPanel implements ActionListener {
     private JLabel highScoreDisplay;
     private int currentRecord;
     private int level = 1;
+    private Tetris tetris;
 
-    private Shape currentPiece;
-    private Tetrominos[] board;
+    private Block currentPiece;
+    private Shape[] board;
 
     public Board(Tetris tetris){
+        this.tetris = tetris;
         setFocusable(true);
-        currentPiece = new Shape();
+        currentPiece = new Block();
         timer = new Timer(timerNumber,this); //timer for lines down
         statusBar = tetris.getScoreBar();
         levelBar = tetris.getLevelBar();
         currentRecord = tetris.getHighScoreNumber();
         highScoreDisplay = tetris.getHighScoreLabel();
-        board = new Tetrominos[BOARD_WIDTH * BOARD_HEIGHT];
+        board = new Shape[BOARD_WIDTH * BOARD_HEIGHT];
         this.setBorder(new BevelBorder(BevelBorder.RAISED,Color.BLACK,Color.BLACK));
         clearBoard();
         addKeyListener(new MyTetrisAdapter());
@@ -54,7 +56,7 @@ public class Board extends JPanel implements ActionListener {
 
     private void clearBoard() {
         for (int i = 0; i < BOARD_HEIGHT * BOARD_WIDTH; i++){
-            board[i] = Tetrominos.NoShape;
+            board[i] = Shape.NoShape;
         }
     }
 
@@ -66,7 +68,7 @@ public class Board extends JPanel implements ActionListener {
         return (int) getSize().getHeight() / BOARD_HEIGHT;
     }
 
-    public Tetrominos shapeAt(int rowIndex, int columnIndex){
+    public Shape shapeAt(int rowIndex, int columnIndex){
         return board[columnIndex * BOARD_WIDTH + rowIndex];
     }
 
@@ -85,7 +87,7 @@ public class Board extends JPanel implements ActionListener {
 
     }
 
-    private void setBoardPiece(Tetrominos shape, int row, int column) {
+    private void setBoardPiece(Shape shape, int row, int column) {
         board[column * BOARD_WIDTH + row] = shape;
     }
 
@@ -143,7 +145,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     //Draw Tetrominos
-    public void drawSquare(Graphics2D g, int x, int y, Tetrominos shape){
+    public void drawSquare(Graphics2D g, int x, int y, Shape shape){
         Color color = COLORS[shape.ordinal()];
         g.setColor(color);
         g.fillRect(x+1,y+1,squareWidth()-2, squareHeight()-2);
@@ -169,20 +171,19 @@ public class Board extends JPanel implements ActionListener {
 
         for(int i=0; i<BOARD_HEIGHT; i++){
             for(int j = 0; j<BOARD_WIDTH; ++j){
-                Tetrominos shape = shapeAt(j, BOARD_HEIGHT - i - 1);
+                Shape shape = shapeAt(j, BOARD_HEIGHT - i - 1);
 
-                if(shape != Tetrominos.NoShape){
+                if(shape != Shape.NoShape){
                     drawSquare(g2d, j*squareWidth(), boardTop + i * squareHeight(), shape);
                 }
             }
         }
 
-        if (currentPiece.getShape() != Tetrominos.NoShape){
+        if (currentPiece.getShape() != Shape.NoShape){
             for(int i =0; i<4; ++i){
                 int x = curX + currentPiece.x(i);
                 int y = curY - currentPiece.y(i);
                 drawSquare(g2d, x * squareWidth(), boardTop + (BOARD_HEIGHT - y - 1) * squareHeight(), currentPiece.getShape());
-                //System.out.println(currentPiece.getShape());
             }
         }
 
@@ -220,7 +221,7 @@ public class Board extends JPanel implements ActionListener {
         repaint();
     }
 
-    private boolean tryMove(Shape newPiece, int newX, int newY){
+    private boolean tryMove(Block newPiece, int newX, int newY){
         for(int i=0; i < 4; ++i) {
             int x = newX + newPiece.x(i);
             int y = newY - newPiece.y(i);
@@ -229,7 +230,7 @@ public class Board extends JPanel implements ActionListener {
                 return false;
             }
 
-            if (shapeAt(x, y) != Tetrominos.NoShape) {
+            if (shapeAt(x, y) != Shape.NoShape) {
                 return false;
             }
         }
@@ -259,28 +260,35 @@ public class Board extends JPanel implements ActionListener {
                 statusBar.setText(String.valueOf("Score: " + numLinesRemoved));
 
                 if(numLinesRemoved >= nextLevelLines){
-                    level = level + 1;
-                    nextLevelLines = (int)(nextLevelLines * 1.5);
-                    timer.stop();
-                    timerNumber = timerNumber - 40;
-                    timer = new Timer(timerNumber,this);
-                    timer.start();
-                    System.out.println(timerNumber);
+                    increaseLevel();
+                    decreaseTimer();
                 }
 
                 levelBar.setText(String.valueOf("Level: " + level));
                 isFallingFinished = true;
-                currentPiece.setShape(Tetrominos.NoShape);
+                currentPiece.setShape(Shape.NoShape);
                 repaint();
             }
         }
+    }
+
+    private void decreaseTimer() {
+        timer.stop();
+        timerNumber = timerNumber - 40;
+        timer = new Timer(timerNumber,this);
+        timer.start();
+    }
+
+    private void increaseLevel() {
+        level = level + 1;
+        nextLevelLines = (int)(nextLevelLines * 1.5);
     }
 
 
     private void removeFullRow(int rowIndex) {
         for(int secondaryRowIndex = rowIndex; secondaryRowIndex < BOARD_HEIGHT - 1; ++secondaryRowIndex){
             for(int columnIndex = 0; columnIndex < BOARD_WIDTH; ++columnIndex){
-                Tetrominos blockAbove = shapeAt(columnIndex, secondaryRowIndex + 1);
+                Shape blockAbove = shapeAt(columnIndex, secondaryRowIndex + 1);
                 setBoardPiece(blockAbove, columnIndex, secondaryRowIndex);
             }
         }
@@ -288,7 +296,7 @@ public class Board extends JPanel implements ActionListener {
 
     private boolean isLineFull(int i) {
         for(int j=0; j<BOARD_WIDTH; ++j){
-            if(shapeAt(j,i) == Tetrominos.NoShape){
+            if(shapeAt(j,i) == Shape.NoShape){
                 return false;
             }
         }
@@ -312,7 +320,7 @@ public class Board extends JPanel implements ActionListener {
     public class MyTetrisAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent ke){
-            if(!isStarted || currentPiece.getShape() == Tetrominos.NoShape){
+            if(!isStarted || currentPiece.getShape() == Shape.NoShape){
                 return;
             }
 
@@ -320,6 +328,12 @@ public class Board extends JPanel implements ActionListener {
 
             if(keyCode == 'p' || keyCode == 'P'){
                 pause();
+            }
+
+            if(keyCode == 'r' || keyCode == 'R'){
+                currentPiece.setShape(Shape.NoShape);
+                //System.out.println();
+                clearBoard();
             }
 
             if(isPaused){
